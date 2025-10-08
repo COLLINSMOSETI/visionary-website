@@ -1,0 +1,1420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visionary - AI Wallpaper Generator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary: #e60023;
+            --dark: #111111;
+            --light: #efefef;
+            --gray: #767676;
+            --card-bg: #ffffff;
+        }
+        
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        /* Header Styles */
+        header {
+            background-color: white;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 5%;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .logo i {
+            margin-right: 8px;
+        }
+        
+        .search-bar {
+            flex: 1;
+            max-width: 800px;
+            margin: 0 20px;
+            position: relative;
+        }
+        
+        .search-bar input {
+            width: 100%;
+            padding: 16px 24px;
+            border-radius: 24px;
+            border: 1px solid #ddd;
+            background-color: #efefef;
+            font-size: 18px;
+            outline: none;
+            transition: all 0.3s;
+        }
+        
+        .search-bar input:focus {
+            background-color: white;
+            box-shadow: 0 0 0 2px rgba(230, 0, 35, 0.2);
+        }
+        
+        .search-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: none;
+            z-index: 100;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .search-suggestions.active {
+            display: block;
+        }
+        
+        .suggestion-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .suggestion-item:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .nav-icons {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .nav-icons a {
+            color: var(--dark);
+            font-size: 20px;
+            text-decoration: none;
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        /* Main Content */
+        main {
+            margin-top: 80px;
+            padding: 20px 5%;
+        }
+        
+        .section-title {
+            font-size: 28px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .section-title span {
+            color: var(--primary);
+        }
+        
+        .categories {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+        
+        .category {
+            padding: 8px 16px;
+            background-color: white;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            white-space: nowrap;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+        
+        .category:hover, .category.active {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        /* AI Generator Section */
+        .ai-generator {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 40px;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .ai-generator h2 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .ai-generator p {
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+        
+        .generator-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .generator-controls input {
+            flex: 1;
+            padding: 12px 20px;
+            border-radius: 8px;
+            border: none;
+            font-size: 16px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border-radius: 24px;
+            border: none;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #c4001d;
+        }
+        
+        .btn-secondary {
+            background-color: white;
+            color: var(--dark);
+        }
+        
+        .btn-secondary:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .download-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        /* Image Grid */
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+        
+        .image-card {
+            border-radius: 16px;
+            overflow: hidden;
+            background-color: var(--card-bg);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .image-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .image-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .image-actions {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            display: flex;
+            gap: 8px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .image-card:hover .image-actions {
+            opacity: 1;
+        }
+        
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--dark);
+            color: white;
+            padding: 40px 5% 20px;
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .footer-column {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .footer-column h3 {
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+        
+        .footer-column a {
+            display: block;
+            color: #ddd;
+            text-decoration: none;
+            margin-bottom: 10px;
+            transition: color 0.3s;
+        }
+        
+        .footer-column a:hover {
+            color: white;
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+            color: #999;
+            font-size: 14px;
+        }
+        
+        /* Cookie Consent */
+        .cookie-consent {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+            max-width: 500px;
+            width: 90%;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .cookie-consent.active {
+            display: block;
+        }
+        
+        .cookie-consent p {
+            margin-bottom: 15px;
+        }
+        
+        .cookie-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        /* Admin Panel */
+        .admin-panel {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+            display: none;
+        }
+        
+        .admin-panel.active {
+            display: block;
+        }
+        
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .upload-area:hover {
+            border-color: var(--primary);
+            background-color: rgba(230, 0, 35, 0.05);
+        }
+        
+        .upload-area i {
+            font-size: 48px;
+            color: var(--gray);
+            margin-bottom: 15px;
+        }
+        
+        /* Fullscreen Image Viewer */
+        .image-viewer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.95);
+            display: none;
+            flex-direction: column;
+            z-index: 2000;
+        }
+        
+        .image-viewer.active {
+            display: flex;
+        }
+        
+        .viewer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            color: white;
+        }
+        
+        .viewer-content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+        
+        .viewer-content img {
+            max-width: 90%;
+            max-height: 70vh;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+        
+        .nav-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .nav-arrow:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .nav-left {
+            left: 30px;
+        }
+        
+        .nav-right {
+            right: 30px;
+        }
+        
+        .viewer-suggestions {
+            padding: 20px;
+            background-color: rgba(255,255,255,0.1);
+            max-height: 200px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            white-space: nowrap;
+        }
+        
+        .suggestions-title {
+            color: white;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .suggestions-container {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .suggestion-img {
+            width: 120px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.3s;
+            flex-shrink: 0;
+        }
+        
+        .suggestion-img:hover, .suggestion-img.active {
+            transform: scale(1.05);
+            border: 2px solid var(--primary);
+        }
+        
+        /* Admin Login */
+        .admin-login {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+        }
+        
+        .admin-login.active {
+            display: flex;
+        }
+        
+        .login-form {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+        }
+        
+        .login-form h2 {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .login-form input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        /* My Images Section */
+        .my-images-section {
+            display: none;
+            margin-top: 30px;
+        }
+        
+        .my-images-section.active {
+            display: block;
+        }
+        
+        /* Contact Button */
+        .contact-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            cursor: pointer;
+            z-index: 100;
+        }
+        
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .search-bar {
+                width: 100%;
+                margin: 10px 0;
+            }
+            
+            .generator-controls {
+                flex-direction: column;
+            }
+            
+            .image-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            
+            .nav-arrow {
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+            }
+            
+            .nav-left {
+                left: 10px;
+            }
+            
+            .nav-right {
+                right: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <i class="fas fa-eye"></i>
+                Visionary
+            </div>
+            
+            <div class="search-bar">
+                <input type="text" placeholder="Search Visionary wallpapers..." id="searchInput">
+                <div class="search-suggestions" id="searchSuggestions">
+                    <div class="suggestion-item">Fancy Cars</div>
+                    <div class="suggestion-item">Fancy Houses</div>
+                    <div class="suggestion-item">Technology</div>
+                    <div class="suggestion-item">Nature</div>
+                    <div class="suggestion-item">Lifestyle</div>
+                    <div class="suggestion-item">Abstract</div>
+                    <div class="suggestion-item">Minimal</div>
+                    <div class="suggestion-item">Space</div>
+                    <div class="suggestion-item">Dark</div>
+                    <div class="suggestion-item">Gaming</div>
+                </div>
+            </div>
+            
+            <div class="nav-icons">
+                <a href="#"><i class="fas fa-home"></i></a>
+                <a href="#" id="myImagesBtn"><i class="fas fa-bookmark"></i></a>
+                <a href="#"><i class="fas fa-bell"></i></a>
+                <div class="user-avatar">U</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- AI Generator -->
+        <section class="ai-generator">
+            <h2>AI Wallpaper Generator</h2>
+            <p>Generate stunning wallpapers with AI. <strong>Powered by Collins.</strong></p>
+            
+            <div class="generator-controls">
+                <input type="text" placeholder="Describe your wallpaper..." id="promptInput">
+                <button class="btn btn-primary" id="generateBtn">
+                    <span id="generateText">Generate</span>
+                    <div class="loading" id="generateLoading" style="display: none;"></div>
+                </button>
+            </div>
+            
+            <div class="download-options">
+                <button class="btn btn-secondary" id="downloadSingle">Download Selected</button>
+                <button class="btn btn-secondary" id="downloadMultiple">Download 100 Images</button>
+            </div>
+        </section>
+        
+        <div class="section-title">
+            <h1>Visionary <span>powered by Collins</span></h1>
+            <button class="btn btn-secondary" id="adminToggle">Admin Dashboard</button>
+        </div>
+        
+        <!-- Categories -->
+        <div class="categories">
+            <div class="category active">All</div>
+            <div class="category">Fancy Cars</div>
+            <div class="category">Fancy Houses</div>
+            <div class="category">Technology</div>
+            <div class="category">Nature</div>
+            <div class="category">Lifestyle</div>
+            <div class="category">Abstract</div>
+            <div class="category">Minimal</div>
+            <div class="category">Dark</div>
+            <div class="category">Space</div>
+            <div class="category">Gaming</div>
+            <div class="category">Animals</div>
+            <div class="category">Architecture</div>
+            <div class="category">Beach</div>
+            <div class="category">Mountains</div>
+        </div>
+        
+        <!-- My Images Section -->
+        <section class="my-images-section" id="myImagesSection">
+            <h2>My Saved Images</h2>
+            <div class="image-grid" id="myImagesGrid">
+                <!-- Saved images will appear here -->
+            </div>
+        </section>
+        
+        <!-- Admin Panel -->
+        <section class="admin-panel" id="adminPanel">
+            <div class="admin-header">
+                <h2>Admin Dashboard</h2>
+                <p>Upload wallpapers - AI will automatically categorize them</p>
+            </div>
+            
+            <div class="upload-area" id="uploadArea">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <h3>Click to Upload Images</h3>
+                <p>AI will automatically categorize your uploads</p>
+                <input type="file" id="fileUpload" multiple accept="image/*" style="display: none;">
+            </div>
+        </section>
+        
+        <!-- Image Grid -->
+        <div class="image-grid" id="imageGrid">
+            <!-- Images will be dynamically added here -->
+        </div>
+        
+        <!-- Load More Button -->
+        <div style="text-align: center; margin: 30px 0;">
+            <button class="btn btn-primary" id="loadMore">Load More Images</button>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-column">
+                <h3>Visionary</h3>
+                <a href="#">About</a>
+                <a href="#">Blog</a>
+                <a href="#">Careers</a>
+                <a href="#">Press</a>
+            </div>
+            
+            <div class="footer-column">
+                <h3>Help Center</h3>
+                <a href="mailto:moseticollins20@gmail.com">Email Support</a>
+                <a href="#">Help Center</a>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+            </div>
+            
+            <div class="footer-column">
+                <h3>Resources</h3>
+                <a href="#">Developers</a>
+                <a href="#">Partners</a>
+                <a href="#">Brand Guidelines</a>
+                <a href="#">Community</a>
+            </div>
+            
+            <div class="footer-column">
+                <h3>Follow Us</h3>
+                <a href="#"><i class="fab fa-facebook"></i> Facebook</a>
+                <a href="#"><i class="fab fa-twitter"></i> Twitter</a>
+                <a href="#"><i class="fab fa-instagram"></i> Instagram</a>
+                <a href="#"><i class="fab fa-c"></i> Collins</a>
+            </div>
+        </div>
+        
+        <div class="copyright">
+            &copy; 2023 Visionary. All rights reserved. Powered by Collins.
+        </div>
+    </footer>
+
+    <!-- Contact Button -->
+    <div class="contact-btn" id="contactBtn">
+        <i class="fas fa-envelope"></i>
+    </div>
+
+    <!-- Cookie Consent -->
+    <div class="cookie-consent" id="cookieConsent">
+        <p>We use cookies to personalize your experience and show you AI-generated wallpapers based on your searches. By accepting, you agree to our use of cookies and will receive daily AI wallpapers tailored to your interests.</p>
+        <div class="cookie-buttons">
+            <button class="btn btn-primary" id="acceptCookies">Accept</button>
+            <button class="btn btn-secondary" id="declineCookies">Decline</button>
+        </div>
+    </div>
+
+    <!-- Fullscreen Image Viewer -->
+    <div class="image-viewer" id="imageViewer">
+        <div class="viewer-header">
+            <h3 id="viewerTitle">Image Preview</h3>
+            <button class="btn btn-secondary" id="closeViewer">
+                <i class="fas fa-times"></i> Close
+            </button>
+        </div>
+        <div class="viewer-content">
+            <button class="nav-arrow nav-left" id="prevImage">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <img id="viewerImage" src="" alt="Fullscreen view">
+            <button class="nav-arrow nav-right" id="nextImage">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+        <div class="viewer-suggestions">
+            <h4 class="suggestions-title">Similar Images</h4>
+            <div class="suggestions-container" id="suggestionsContainer">
+                <!-- Similar images will appear here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Login -->
+    <div class="admin-login" id="adminLogin">
+        <div class="login-form">
+            <h2>Admin Login</h2>
+            <input type="password" id="adminPassword" placeholder="Enter admin password">
+            <button class="btn btn-primary" id="loginBtn" style="width: 100%;">Login</button>
+            <button class="btn btn-secondary" id="cancelLogin" style="width: 100%; margin-top: 10px;">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        // Real high-quality wallpapers (no people)
+        const realWallpapers = [
+            // Technology
+            { id: 1, category: 'Technology', url: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&w=1200&h=800&fit=crop&q=80' },
+            { id: 2, category: 'Technology', url: 'https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?ixlib=rb-4.0.3&w=1200&h=800&fit=crop&q=80' },
+            { id: 3, category: 'Technology', url: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?ixlib=rb-4.0.3&w=1200&h=800&fit=crop&q=80' },
+            
+            // Nature
+            { id: 4, category: 'Nature', url: 'https://images.unsplash.com/photo-1501854140801-50d01698950b?ixlib=rb-4.0.3&w=1200&h=800&fit=crop&q=80' },
+            { id: 5, category: 'Nature', url: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&w=1200&h=800&fit=crop&q=80' },
+            { id: 6, category: 'Nature', url: 'https://images.unsplash.com/photo-1426604966848-d7adac402bff?ixlib=rb-4.0.3&w=1200&h=800&fit=crop&q=80' },
+            
+            // Fancy Cars
+            { id: 7, category: 'Fancy Cars', url: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?ixlib=rb-4.0.3&w=1200&h=800&fit=crop&q=80' },
+            { id: 8, category: 'Fancy Cars', url: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?ixlib=rb-4.0.3&w=1200&h=800&fit=crop&q=80' },
+            { id: 9, category: 'Fancy Cars', url: 'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?ixlib=rb-4.0.3&w=1200&h=800&fit=crop&q=80' },
+            
+            // Fancy Houses
+            { id: 10, category: 'Fancy Houses', url: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?ixlib=rb-4.0.3&w=1200&h=800&fit=crop&q=80' },
+            { id: 11, category: 'Fancy Houses', url: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?ixlib=rb-4.0.3&w=1200&h=800&fit=crop&q=80' },
+            { id: 12, category: 'Fancy Houses', url: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&w=1200&h=800&fit=crop&q=80' },
+            
+            // Abstract
+            { id: 13, category: 'Abstract', url: 'https://images.unsplash.com/photo-1550684376-efcbd6e3f031?ixlib=rb-4.0.3&w=1200&h=800&fit=crop&q=80' },
+            { id: 14, category: 'Abstract', url: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&w=1200&h=800&fit=crop&q=80' },
+            
+            // Space
+            { id: 15, category: 'Space', url: 'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?ixlib=rb-4.0.3&w=1200&h=800&fit=crop&q=80' },
+            { id: 16, category: 'Space', url: 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?ixlib=rb-4.0.3&w=1200&h=800&fit=crop&q=80' },
+            
+            // Minimal
+            { id: 17, category: 'Minimal', url: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?ixlib=rb-4.0.3&w=1200&h=800&fit=crop&q=80' },
+            { id: 18, category: 'Minimal', url: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&w=1200&h=800&fit=crop&q=80' },
+            
+            // Dark
+            { id: 19, category: 'Dark', url: 'https://images.unsplash.com/photo-1505506874110-6a7a69069a08?ixlib=rb-4.0.3&w=1200&h=800&fit=crop&q=80' },
+            { id: 20, category: 'Dark', url: 'https://images.unsplash.com/photo-1506905925347-8b27017b7ba9?ixlib=rb-4.0.3&w=1200&h=800&fit=crop&q=80' },
+            
+            // Gaming
+            { id: 21, category: 'Gaming', url: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?ixlib=rb-4.0.3&w=1200&h=800&fit=crop&q=80' },
+            { id: 22, category: 'Gaming', url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?ixlib=rb-4.0.3&w=1200&h=800&fit=crop&q=80' },
+            
+            // Animals
+            { id: 23, category: 'Animals', url: 'https://images.unsplash.com/photo-1474511320723-9a56873867b5?ixlib=rb-4.0.3&w=1200&h=800&fit=crop&q=80' },
+            { id: 24, category: 'Animals', url: 'https://images.unsplash.com/photo-1456926631375-92c8ce872def?ixlib=rb-4.0.3&w=1200&h=800&fit=crop&q=80' },
+            
+            // Architecture
+            { id: 25, category: 'Architecture', url: 'https://images.unsplash.com/photo-1487957642153-8e4e49be56e4?ixlib=rb-4.0.3&w=1200&h=800&fit=crop&q=80' },
+            { id: 26, category: 'Architecture', url: 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?ixlib=rb-4.0.3&w=1200&h=800&fit=crop&q=80' },
+            
+            // Beach
+            { id: 27, category: 'Beach', url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&w=1200&h=800&fit=crop&q=80' },
+            { id: 28, category: 'Beach', url: 'https://images.unsplash.com/photo-1519046904884-53103b34b206?ixlib=rb-4.0.3&w=1200&h=800&fit=crop&q=80' },
+            
+            // Mountains
+            { id: 29, category: 'Mountains', url: 'https://images.unsplash.com/photo-1464822755883-p2d2f0fadf43?ixlib=rb-4.0.3&w=1200&h=800&fit=crop&q=80' },
+            { id: 30, category: 'Mountains', url: 'https://images.unsplash.com/photo-1464822755883-p2d2f0fadf43?ixlib=rb-4.0.3&w=1200&h=800&fit=crop&q=80' },
+            
+            // Lifestyle
+            { id: 31, category: 'Lifestyle', url: 'https://images.unsplash.com/photo-1551963831-b3b1ca40c98e?ixlib=rb-4.0.3&w=1200&h=800&fit=crop&q=80' },
+            { id: 32, category: 'Lifestyle', url: 'https://images.unsplash.com/photo-1552058544-f2b08422138a?ixlib=rb-4.0.3&w=1200&h=800&fit=crop&q=80' }
+        ];
+
+        // Generate more wallpapers to reach 20,000+
+        function generateMoreWallpapers() {
+            const categories = ['Technology', 'Nature', 'Fancy Cars', 'Fancy Houses', 'Abstract', 'Space', 'Minimal', 'Dark', 'Gaming', 'Animals', 'Architecture', 'Beach', 'Mountains', 'Lifestyle'];
+            const baseUrls = [
+                'https://images.unsplash.com/photo-1518709268805-4e9042af2176',
+                'https://images.unsplash.com/photo-1501854140801-50d01698950b',
+                'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7',
+                'https://images.unsplash.com/photo-1613490493576-7fde63acd811',
+                'https://images.unsplash.com/photo-1550684376-efcbd6e3f031',
+                'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06',
+                'https://images.unsplash.com/photo-1518837695005-2083093ee35b',
+                'https://images.unsplash.com/photo-1505506874110-6a7a69069a08',
+                'https://images.unsplash.com/photo-1542751371-adc38448a05e',
+                'https://images.unsplash.com/photo-1474511320723-9a56873867b5',
+                'https://images.unsplash.com/photo-1487957642153-8e4e49be56e4',
+                'https://images.unsplash.com/photo-1507525428034-b723cf961d3e',
+                'https://images.unsplash.com/photo-1464822755883-p2d2f0fadf43',
+                'https://images.unsplash.com/photo-1551963831-b3b1ca40c98e'
+            ];
+            
+            const moreWallpapers = [];
+            let id = realWallpapers.length + 1;
+            
+            for (let i = 0; i < 20000; i++) {
+                const category = categories[Math.floor(Math.random() * categories.length)];
+                const baseUrl = baseUrls[Math.floor(Math.random() * baseUrls.length)];
+                const randomNum = Math.floor(Math.random() * 1000);
+                
+                moreWallpapers.push({
+                    id: id++,
+                    category: category,
+                    url: `${baseUrl}?ixlib=rb-4.0.3&w=1200&h=800&fit=crop&q=80&v=${randomNum}`,
+                    title: `${category} wallpaper ${i}`
+                });
+            }
+            
+            return moreWallpapers;
+        }
+
+        // Combine real wallpapers with generated ones
+        const allWallpapers = [...realWallpapers, ...generateMoreWallpapers()];
+
+        // DOM Elements
+        const searchInput = document.getElementById('searchInput');
+        const searchSuggestions = document.getElementById('searchSuggestions');
+        const generateBtn = document.getElementById('generateBtn');
+        const generateText = document.getElementById('generateText');
+        const generateLoading = document.getElementById('generateLoading');
+        const promptInput = document.getElementById('promptInput');
+        const downloadSingle = document.getElementById('downloadSingle');
+        const downloadMultiple = document.getElementById('downloadMultiple');
+        const imageGrid = document.getElementById('imageGrid');
+        const adminToggle = document.getElementById('adminToggle');
+        const adminPanel = document.getElementById('adminPanel');
+        const cookieConsent = document.getElementById('cookieConsent');
+        const acceptCookies = document.getElementById('acceptCookies');
+        const declineCookies = document.getElementById('declineCookies');
+        const categories = document.querySelectorAll('.category');
+        const uploadArea = document.getElementById('uploadArea');
+        const imageViewer = document.getElementById('imageViewer');
+        const viewerImage = document.getElementById('viewerImage');
+        const closeViewer = document.getElementById('closeViewer');
+        const suggestionsContainer = document.getElementById('suggestionsContainer');
+        const adminLogin = document.getElementById('adminLogin');
+        const adminPassword = document.getElementById('adminPassword');
+        const loginBtn = document.getElementById('loginBtn');
+        const cancelLogin = document.getElementById('cancelLogin');
+        const myImagesBtn = document.getElementById('myImagesBtn');
+        const myImagesSection = document.getElementById('myImagesSection');
+        const myImagesGrid = document.getElementById('myImagesGrid');
+        const contactBtn = document.getElementById('contactBtn');
+        const loadMore = document.getElementById('loadMore');
+        const prevImage = document.getElementById('prevImage');
+        const nextImage = document.getElementById('nextImage');
+
+        // State variables
+        let savedImages = JSON.parse(localStorage.getItem('savedImages')) || [];
+        let isAdminLoggedIn = false;
+        let currentViewerIndex = 0;
+        let currentViewerImages = [];
+        let displayedImages = 20;
+
+        // Show cookie consent after 2 seconds
+        setTimeout(() => {
+            cookieConsent.classList.add('active');
+        }, 2000);
+
+        // Search suggestions
+        searchInput.addEventListener('focus', () => {
+            searchSuggestions.classList.add('active');
+        });
+
+        searchInput.addEventListener('blur', () => {
+            setTimeout(() => {
+                searchSuggestions.classList.remove('active');
+            }, 200);
+        });
+
+        // Fill search with suggestion
+        document.querySelectorAll('.suggestion-item').forEach(item => {
+            item.addEventListener('click', () => {
+                searchInput.value = item.textContent;
+                searchSuggestions.classList.remove('active');
+                filterImagesByCategory(item.textContent);
+            });
+        });
+
+        // Generate AI wallpapers
+        generateBtn.addEventListener('click', () => {
+            const prompt = promptInput.value;
+            if (prompt.trim() === '') {
+                alert('Please enter a description for your wallpaper');
+                return;
+            }
+            
+            // Show loading state
+            generateText.style.display = 'none';
+            generateLoading.style.display = 'inline-block';
+            
+            // Simulate AI generation
+            setTimeout(() => {
+                generateText.style.display = 'inline';
+                generateLoading.style.display = 'none';
+                
+                // Add some sample generated images
+                for (let i = 0; i < 6; i++) {
+                    const randomImage = allWallpapers[Math.floor(Math.random() * allWallpapers.length)];
+                    addImageToGrid(randomImage.url, `AI Generated: ${prompt}`, true);
+                }
+                
+                alert(`Generated 6 AI wallpapers for: "${prompt}"`);
+            }, 1500);
+        });
+
+        // Download functionality
+        downloadSingle.addEventListener('click', () => {
+            // In a real app, this would download the selected image
+            // For demo, we'll download a sample image
+            const url = 'https://images.unsplash.com/photo-1464822755883-p2d2f0fadf43?ixlib=rb-4.0.3&w=1200&h=800&fit=crop&q=80';
+            downloadImage(url, 'visionary-wallpaper.jpg');
+        });
+
+        downloadMultiple.addEventListener('click', () => {
+            alert('Starting download of 100 AI-generated images...');
+            // In a real implementation, this would download a zip file with 100 images
+            // For demo purposes, we'll download one sample image
+            const url = 'https://images.unsplash.com/photo-1464822755883-p2d2f0fadf43?ixlib=rb-4.0.3&w=1200&h=800&fit=crop&q=80';
+            downloadImage(url, 'visionary-wallpapers-pack.zip');
+        });
+
+        // Function to download an image
+        function downloadImage(url, filename) {
+            // Create a temporary anchor element
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            
+            // Show success message
+            setTimeout(() => {
+                alert(`Download successful! Your image has been saved to your PC's download folder.`);
+            }, 500);
+        }
+
+        // Admin panel toggle with password protection
+        adminToggle.addEventListener('click', () => {
+            if (!isAdminLoggedIn) {
+                adminLogin.classList.add('active');
+            } else {
+                adminPanel.classList.toggle('active');
+            }
+        });
+
+        // Admin login
+        loginBtn.addEventListener('click', () => {
+            if (adminPassword.value === '1110') {
+                isAdminLoggedIn = true;
+                adminLogin.classList.remove('active');
+                adminPanel.classList.add('active');
+                adminPassword.value = '';
+            } else {
+                alert('Incorrect password. Please try again.');
+            }
+        });
+
+        cancelLogin.addEventListener('click', () => {
+            adminLogin.classList.remove('active');
+            adminPassword.value = '';
+        });
+
+        // Upload area functionality - simplified
+        uploadArea.addEventListener('click', () => {
+            if (isAdminLoggedIn) {
+                document.getElementById('fileUpload').click();
+            } else {
+                alert('Please log in as admin first.');
+            }
+        });
+
+        document.getElementById('fileUpload').addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                alert(`Uploaded ${e.target.files.length} files. AI system is automatically categorizing them.`);
+                // In a real app, this would upload and process the images
+            }
+        });
+
+        // Cookie consent
+        acceptCookies.addEventListener('click', () => {
+            cookieConsent.classList.remove('active');
+            alert('Thank you for accepting cookies! You will now receive daily AI-generated wallpapers based on your searches.');
+        });
+
+        declineCookies.addEventListener('click', () => {
+            cookieConsent.classList.remove('active');
+        });
+
+        // Category filtering
+        categories.forEach(category => {
+            category.addEventListener('click', () => {
+                categories.forEach(c => c.classList.remove('active'));
+                category.classList.add('active');
+                
+                const categoryName = category.textContent;
+                filterImagesByCategory(categoryName);
+            });
+        });
+
+        // Function to filter images by category
+        function filterImagesByCategory(categoryName) {
+            // Clear current images
+            imageGrid.innerHTML = '';
+            displayedImages = 20;
+            
+            if (categoryName === 'All') {
+                // Show all images
+                loadInitialImages();
+            } else {
+                // Filter by category
+                const filteredImages = allWallpapers.filter(img => img.category === categoryName);
+                currentViewerImages = filteredImages;
+                
+                // Display first 20 images
+                for (let i = 0; i < Math.min(20, filteredImages.length); i++) {
+                    addImageToGrid(filteredImages[i].url, filteredImages[i].category);
+                }
+                
+                // Show or hide load more button
+                if (filteredImages.length > 20) {
+                    loadMore.style.display = 'block';
+                } else {
+                    loadMore.style.display = 'none';
+                }
+            }
+        }
+
+        // Function to add images to the grid
+        function addImageToGrid(url, title, isAI = false) {
+            const imageCard = document.createElement('div');
+            imageCard.className = 'image-card';
+            
+            imageCard.innerHTML = `
+                <img src="${url}" alt="${title}" loading="lazy">
+                <div class="image-actions">
+                    <div class="action-btn" title="Download">
+                        <i class="fas fa-download"></i>
+                    </div>
+                    <div class="action-btn" title="Save">
+                        <i class="fas fa-bookmark"></i>
+                    </div>
+                </div>
+            `;
+            
+            imageGrid.appendChild(imageCard);
+            
+            // Add download functionality
+            const downloadBtn = imageCard.querySelector('.fa-download').closest('.action-btn');
+            downloadBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                downloadImage(url, 'visionary-wallpaper.jpg');
+            });
+            
+            // Add save functionality
+            const saveBtn = imageCard.querySelector('.fa-bookmark').closest('.action-btn');
+            saveBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                saveImage(url, title);
+            });
+            
+            // Add click to open fullscreen - FIXED
+            const imgElement = imageCard.querySelector('img');
+            imgElement.addEventListener('click', (e) => {
+                // Find the index of this image in the current viewer images
+                let imageIndex;
+                if (isAI) {
+                    // For AI generated images, use all images
+                    imageIndex = allWallpapers.findIndex(img => img.url === url);
+                    currentViewerImages = allWallpapers;
+                } else {
+                    // For regular images, use the filtered set
+                    imageIndex = currentViewerImages.findIndex(img => img.url === url);
+                }
+                
+                if (imageIndex !== -1) {
+                    openImageViewer(imageIndex, currentViewerImages);
+                }
+            });
+        }
+
+        // Function to save an image
+        function saveImage(url, title) {
+            // Check if image is already saved
+            if (!savedImages.some(img => img.url === url)) {
+                savedImages.push({ url, title });
+                localStorage.setItem('savedImages', JSON.stringify(savedImages));
+                alert('Image saved to your collection!');
+                updateMyImagesGrid();
+            } else {
+                alert('This image is already in your collection.');
+            }
+        }
+
+        // Function to update the My Images grid
+        function updateMyImagesGrid() {
+            myImagesGrid.innerHTML = '';
+            savedImages.forEach(image => {
+                const imageCard = document.createElement('div');
+                imageCard.className = 'image-card';
+                
+                imageCard.innerHTML = `
+                    <img src="${image.url}" alt="${image.title}">
+                    <div class="image-actions">
+                        <div class="action-btn" title="Download">
+                            <i class="fas fa-download"></i>
+                        </div>
+                        <div class="action-btn" title="Remove">
+                            <i class="fas fa-trash"></i>
+                        </div>
+                    </div>
+                `;
+                
+                myImagesGrid.appendChild(imageCard);
+                
+                // Add download functionality
+                const downloadBtn = imageCard.querySelector('.fa-download').closest('.action-btn');
+                downloadBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    downloadImage(image.url, 'visionary-wallpaper.jpg');
+                });
+                
+                // Add remove functionality
+                const removeBtn = imageCard.querySelector('.fa-trash').closest('.action-btn');
+                removeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    removeImage(image.url);
+                });
+                
+                // Add click to open fullscreen
+                const imgElement = imageCard.querySelector('img');
+                imgElement.addEventListener('click', (e) => {
+                    const imageIndex = savedImages.findIndex(img => img.url === image.url);
+                    openImageViewer(imageIndex, savedImages);
+                });
+            });
+        }
+
+        // Function to remove an image from saved
+        function removeImage(url) {
+            savedImages = savedImages.filter(img => img.url !== url);
+            localStorage.setItem('savedImages', JSON.stringify(savedImages));
+            updateMyImagesGrid();
+        }
+
+        // Function to open image viewer - FIXED
+        function openImageViewer(index, images) {
+            currentViewerIndex = index;
+            currentViewerImages = images;
+            
+            viewerImage.src = images[index].url;
+            document.getElementById('viewerTitle').textContent = images[index].category;
+            imageViewer.classList.add('active');
+            
+            // Add similar images to suggestions
+            updateSuggestions(images, index);
+        }
+
+        // Function to update suggestions
+        function updateSuggestions(images, currentIndex) {
+            suggestionsContainer.innerHTML = '';
+            
+            // Get up to 10 similar images (excluding the current one)
+            const similarImages = images
+                .filter((img, index) => index !== currentIndex && img.category === images[currentIndex].category)
+                .slice(0, 10);
+            
+            // If not enough similar images, add any images
+            if (similarImages.length < 10) {
+                const additionalImages = images
+                    .filter((img, index) => index !== currentIndex)
+                    .slice(0, 10 - similarImages.length);
+                similarImages.push(...additionalImages);
+            }
+            
+            similarImages.forEach((img, index) => {
+                const suggestionImg = document.createElement('img');
+                suggestionImg.className = 'suggestion-img';
+                if (index === 0) suggestionImg.classList.add('active');
+                suggestionImg.src = img.url;
+                suggestionImg.alt = 'Similar image';
+                suggestionImg.addEventListener('click', () => {
+                    // Remove active class from all suggestions
+                    document.querySelectorAll('.suggestion-img').forEach(s => s.classList.remove('active'));
+                    // Add active class to clicked suggestion
+                    suggestionImg.classList.add('active');
+                    
+                    // Update viewer with selected image
+                    const newIndex = images.findIndex(image => image.url === img.url);
+                    if (newIndex !== -1) {
+                        currentViewerIndex = newIndex;
+                        viewerImage.src = img.url;
+                        document.getElementById('viewerTitle').textContent = img.category;
+                    }
+                });
+                suggestionsContainer.appendChild(suggestionImg);
+            });
+        }
+
+        // Navigate to previous image
+        prevImage.addEventListener('click', () => {
+            if (currentViewerIndex > 0) {
+                currentViewerIndex--;
+                viewerImage.src = currentViewerImages[currentViewerIndex].url;
+                document.getElementById('viewerTitle').textContent = currentViewerImages[currentViewerIndex].category;
+                updateSuggestions(currentViewerImages, currentViewerIndex);
+            }
+        });
+
+        // Navigate to next image
+        nextImage.addEventListener('click', () => {
+            if (currentViewerIndex < currentViewerImages.length - 1) {
+                currentViewerIndex++;
+                viewerImage.src = currentViewerImages[currentViewerIndex].url;
+                document.getElementById('viewerTitle').textContent = currentViewerImages[currentViewerIndex].category;
+                updateSuggestions(currentViewerImages, currentViewerIndex);
+            }
+        });
+
+        // Close image viewer
+        closeViewer.addEventListener('click', () => {
+            imageViewer.classList.remove('active');
+        });
+
+        // My Images button
+        myImagesBtn.addEventListener('click', () => {
+            myImagesSection.classList.toggle('active');
+            if (myImagesSection.classList.contains('active')) {
+                updateMyImagesGrid();
+            }
+        });
+
+        // Contact button
+        contactBtn.addEventListener('click', () => {
+            window.location.href = 'mailto:moseticollins20@gmail.com?subject=Visionary Website Inquiry';
+        });
+
+        // Load more images
+        loadMore.addEventListener('click', () => {
+            const activeCategory = document.querySelector('.category.active').textContent;
+            let imagesToShow;
+            
+            if (activeCategory === 'All') {
+                imagesToShow = allWallpapers;
+            } else {
+                imagesToShow = allWallpapers.filter(img => img.category === activeCategory);
+            }
+            
+            // Show next 20 images
+            for (let i = displayedImages; i < Math.min(displayedImages + 20, imagesToShow.length); i++) {
+                addImageToGrid(imagesToShow[i].url, imagesToShow[i].category);
+            }
+            
+            displayedImages += 20;
+            
+            // Hide load more button if all images are displayed
+            if (displayedImages >= imagesToShow.length) {
+                loadMore.style.display = 'none';
+            }
+        });
+
+        // Load initial images
+        function loadInitialImages() {
+            imageGrid.innerHTML = '';
+            displayedImages = 20;
+            currentViewerImages = allWallpapers;
+            
+            for (let i = 0; i < Math.min(20, allWallpapers.length); i++) {
+                addImageToGrid(allWallpapers[i].url, allWallpapers[i].category);
+            }
+            
+            if (allWallpapers.length > 20) {
+                loadMore.style.display = 'block';
+            } else {
+                loadMore.style.display = 'none';
+            }
+        }
+
+        // Initialize with wallpapers
+        loadInitialImages();
+        
+        // Display image count
+        console.log(`Loaded ${allWallpapers.length} beautiful wallpapers (no people)`);
+    </script>
+</body>
+</html>
